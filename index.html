@@ -260,7 +260,7 @@ function renderCalendar() {
         const pipCls = ev.status === "완료" ? "pip pip-done" : `pip pip-${ev.type}`;
         let pipText = ev.type;
         if (ev.status === "완료") pipText = `${ev.type} 완료`;
-        else if (ev.status === "하는중") pipText = `${ev.type} 중`;
+        else if (ev.status === "진행중") pipText = `${ev.type} 중`;
         pips += `<div class="${pipCls}">${pipText}</div>`;
       }
       if (events.length > 3) pips += `<div class="pip" style="background:#a8a29e;">+${events.length - 3}</div>`;
@@ -294,8 +294,8 @@ function selectDate(dateStr) {
     let typeBadge;
     if (ev.status === "완료") {
       typeBadge = `<span class="badge badge-${ev.type}" style="opacity:.65">${ev.type}</span><span class="badge badge-done">완료</span>`;
-    } else if (ev.status === "하는중") {
-      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-doing">하는중</span>`;
+    } else if (ev.status === "진행중") {
+      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-doing">진행중</span>`;
     } else {
       typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-예정">예정</span>`;
     }
