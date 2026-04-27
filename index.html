@@ -57,7 +57,7 @@
   .pip-촬영 { background: #3b82f6; }
   .pip-편집 { background: #8b5cf6; }
   .pip-업로드 { background: #22c55e; }
-  .pip-done { background: #d6d3d1; color: #78716c; text-decoration: line-through; }
+  .pip-done { background: #d6d3d1; color: #44403c; font-weight: 700; }
 
   /* ── 디테일 패널 ── */
   .detail { margin-top: 20px; background: white; border: 1px solid #e7e5e4; border-radius: 10px; padding: 18px; }
@@ -257,7 +257,8 @@ function renderCalendar() {
       pips = '<div class="pips">';
       for (const ev of events.slice(0, 3)) {
         const pipCls = ev.status === "완료" ? "pip pip-done" : `pip pip-${ev.type}`;
-        pips += `<div class="${pipCls}">${ev.type}</div>`;
+        const pipText = ev.status === "완료" ? `${ev.type} 완료` : ev.type;
+        pips += `<div class="${pipCls}">${pipText}</div>`;
       }
       if (events.length > 3) pips += `<div class="pip" style="background:#a8a29e;">+${events.length - 3}</div>`;
       pips += '</div>';
@@ -288,7 +289,7 @@ function selectDate(dateStr) {
   let items = "";
   for (const ev of events) {
     const typeBadge = ev.status === "완료"
-      ? `<span class="badge badge-done">완료</span>`
+      ? `<span class="badge badge-${ev.type}" style="opacity:.65">${ev.type}</span><span class="badge badge-done">완료</span>`
       : `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-예정">예정</span>`;
     const timeBadge = ev.time ? `<span class="badge badge-time">${ev.time}</span>` : "";
     const catBadge = `<span class="badge badge-cat">${ev.category}</span>`;
