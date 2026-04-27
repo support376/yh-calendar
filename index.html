@@ -73,6 +73,7 @@
   .badge-cat { background: #fef3c7; color: #92400e; }
   .badge-done { background: #e7e5e4; color: #78716c; }
   .badge-예정 { background: #f0f9ff; color: #0369a1; }
+  .badge-doing { background: #fef3c7; color: #92400e; }
   .badge-time { background: #f1f5f9; color: #334155; font-variant-numeric: tabular-nums; font-weight: 700; }
   .detail-title { font-weight: 600; font-size: 14px; color: #1c1917; }
   .detail-id { font-size: 12px; color: #a8a29e; }
@@ -212,7 +213,7 @@ function upcomingEvents() {
   const all = [];
   for (const v of VIDEOS) {
     for (const s of v.steps) {
-      if (s.date >= t && s.status === "예정") {
+      if (s.date >= t && s.status !== "완료") {
         all.push({ ...s, videoTitle: v.title, videoId: v.id });
       }
     }
@@ -257,7 +258,9 @@ function renderCalendar() {
       pips = '<div class="pips">';
       for (const ev of events.slice(0, 3)) {
         const pipCls = ev.status === "완료" ? "pip pip-done" : `pip pip-${ev.type}`;
-        const pipText = ev.status === "완료" ? `${ev.type} 완료` : ev.type;
+        let pipText = ev.type;
+        if (ev.status === "완료") pipText = `${ev.type} 완료`;
+        else if (ev.status === "하는중") pipText = `${ev.type} 중`;
         pips += `<div class="${pipCls}">${pipText}</div>`;
       }
       if (events.length > 3) pips += `<div class="pip" style="background:#a8a29e;">+${events.length - 3}</div>`;
@@ -288,9 +291,14 @@ function selectDate(dateStr) {
 
   let items = "";
   for (const ev of events) {
-    const typeBadge = ev.status === "완료"
-      ? `<span class="badge badge-${ev.type}" style="opacity:.65">${ev.type}</span><span class="badge badge-done">완료</span>`
-      : `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-예정">예정</span>`;
+    let typeBadge;
+    if (ev.status === "완료") {
+      typeBadge = `<span class="badge badge-${ev.type}" style="opacity:.65">${ev.type}</span><span class="badge badge-done">완료</span>`;
+    } else if (ev.status === "하는중") {
+      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-doing">하는중</span>`;
+    } else {
+      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-예정">예정</span>`;
+    }
     const timeBadge = ev.time ? `<span class="badge badge-time">${ev.time}</span>` : "";
     const catBadge = `<span class="badge badge-cat">${ev.category}</span>`;
     const note = ev.note ? `<div class="detail-note">${ev.note}</div>` : "";
