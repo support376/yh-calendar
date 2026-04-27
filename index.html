@@ -78,6 +78,7 @@
   .detail-title { font-weight: 600; font-size: 14px; color: #1c1917; }
   .detail-id { font-size: 12px; color: #a8a29e; }
   .detail-note { font-size: 12px; color: #57534e; margin-top: 4px; }
+  .detail-range { font-size: 12px; color: #57534e; margin-top: 4px; font-weight: 500; padding: 4px 0; }
   .plan-summary { font-size: 13px; color: #44403c; margin-top: 8px; padding: 10px 12px; background: white; border-left: 3px solid #0284c7; border-radius: 4px; line-height: 1.6; }
   .plan-link { display: inline-block; margin-top: 8px; padding: 6px 12px; background: #0284c7; color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600; transition: background .1s; }
   .plan-link:hover { background: #0369a1; }
@@ -225,12 +226,29 @@ function fmtKo(s) {
   return `${y}년 ${m}월 ${d}일 (${DOW[new Date(y,m-1,d).getDay()]})`;
 }
 
-/* 날짜 → 그날의 이벤트 목록 */
+function dateRangeLabel(start, end) {
+  if (!end || end === start) {
+    const [, m, d] = start.split("-").map(Number);
+    return `${m}/${d}`;
+  }
+  const [, m1, d1] = start.split("-").map(Number);
+  const [, m2, d2] = end.split("-").map(Number);
+  return m1 === m2 ? `${m1}/${d1} ~ ${d2}` : `${m1}/${d1} ~ ${m2}/${d2}`;
+}
+
+function daysBetween(start, end) {
+  const a = new Date(start), b = new Date(end);
+  return Math.round((b - a) / 86400000) + 1;
+}
+
+/* 날짜 → 그날의 이벤트 목록 (endDate 있으면 range 처리) */
 function eventsOn(dateStr) {
   const list = [];
   for (const v of VIDEOS) {
     for (const s of v.steps) {
-      if (s.date === dateStr) {
+      const start = s.date;
+      const end = s.endDate || s.date;
+      if (dateStr >= start && dateStr <= end) {
         list.push({ ...s, videoId: v.id, videoTitle: v.title, category: v.category, note: v.note, plan: v.plan });
       }
     }
@@ -238,13 +256,17 @@ function eventsOn(dateStr) {
   return list;
 }
 
-/* 이번달 통계 */
+/* 이번달 통계 — range step은 1건으로만 카운트 (월 겹침 기준) */
 function monthStats(y, m) {
+  const monthStart = `${y}-${pad(m)}-01`;
+  const lastDay = new Date(y, m, 0).getDate();
+  const monthEnd = `${y}-${pad(m)}-${pad(lastDay)}`;
   let total = 0, done = 0, shoots = 0, uploads = 0;
-  const prefix = `${y}-${pad(m)}`;
   for (const v of VIDEOS) {
     for (const s of v.steps) {
-      if (!s.date.startsWith(prefix)) continue;
+      const stepStart = s.date;
+      const stepEnd = s.endDate || s.date;
+      if (stepStart > monthEnd || stepEnd < monthStart) continue;
       total++;
       if (s.status === "완료") done++;
       if (s.type === "촬영" && s.status === "예정") shoots++;
@@ -260,7 +282,8 @@ function upcomingEvents() {
   const all = [];
   for (const v of VIDEOS) {
     for (const s of v.steps) {
-      if (s.date >= t && s.status !== "완료") {
+      const stepEnd = s.endDate || s.date;
+      if (stepEnd >= t && s.status !== "완료") {
         all.push({ ...s, videoTitle: v.title, videoId: v.id });
       }
     }
@@ -351,10 +374,15 @@ function selectDate(dateStr) {
     const note = ev.note ? `<div class="detail-note">${ev.note}</div>` : "";
     const planSummary = ev.plan && ev.plan.summary ? `<div class="plan-summary">${ev.plan.summary}</div>` : "";
     const planLink = ev.plan && ev.plan.url ? `<a class="plan-link" href="${ev.plan.url}" target="_blank" rel="noopener">기획안 전문 보기 →</a>` : "";
+    const isRange = ev.endDate && ev.endDate !== ev.date;
+    const rangeInfo = isRange
+      ? `<div class="detail-range">기간: ${dateRangeLabel(ev.date, ev.endDate)} · 총 ${daysBetween(ev.date, ev.endDate)}일</div>`
+      : "";
     items += `
       <div class="detail-item">
         <div class="detail-top">${typeBadge}${timeBadge}${catBadge}<span class="detail-id">${ev.videoId}</span></div>
         <div class="detail-title">${ev.videoTitle}</div>
+        ${rangeInfo}
         ${note}
         ${planSummary}
         ${planLink}
@@ -372,11 +400,15 @@ function renderUpcoming() {
   }
   let rows = "";
   for (const ev of list) {
-    const [,m,d] = ev.date.split("-").map(Number);
-    const upTime = ev.time ? `<span class="badge badge-time" style="font-size:10px;">${ev.time}</span>` : "";
+    const isRange = ev.endDate && ev.endDate !== ev.date;
+    const dateText = isRange ? dateRangeLabel(ev.date, ev.endDate) : (() => {
+      const [,m,d] = ev.date.split("-").map(Number);
+      return `${m}/${d}`;
+    })();
+    const upTime = (!isRange && ev.time) ? `<span class="badge badge-time" style="font-size:10px;">${ev.time}</span>` : "";
     rows += `
       <div class="up-row">
-        <div class="up-date">${m}/${d}</div>
+        <div class="up-date">${dateText}</div>
         <span class="badge badge-${ev.type}" style="font-size:10px;">${ev.type}</span>
         ${upTime}
         <div class="up-title">${ev.videoTitle}</div>
@@ -427,16 +459,17 @@ function progressDots(v) {
 function statusLine(v, stage) {
   const next = v.steps.find(s => s.status !== "완료");
   if (next) {
-    const [, m, d] = next.date.split("-").map(Number);
-    const time = next.time ? ` ${next.time}` : "";
+    const isRange = next.endDate && next.endDate !== next.date;
+    const dateText = dateRangeLabel(next.date, next.endDate);
+    const time = (!isRange && next.time) ? ` ${next.time}` : "";
     const verb = next.status === "진행중" ? "진행중" : "예정";
-    return `<div class="bcard-next"><strong>${m}/${d}${time}</strong> · ${next.type} ${verb}</div>`;
+    return `<div class="bcard-next"><strong>${dateText}${time}</strong> · ${next.type} ${verb}</div>`;
   }
   if (stage === "done") {
     const up = v.steps.find(s => s.type === "업로드");
     if (up) {
-      const [, m, d] = up.date.split("-").map(Number);
-      return `<div class="bcard-next done-line"><strong>${m}/${d}</strong> · 업로드 완료</div>`;
+      const dateText = dateRangeLabel(up.date, up.endDate);
+      return `<div class="bcard-next done-line"><strong>${dateText}</strong> · 업로드 완료</div>`;
     }
   }
   return "";
