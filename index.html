@@ -418,7 +418,7 @@ function renderUpcoming() {
   const list = upcomingEvents();
   const el = document.getElementById("upcoming");
   if (!list.length) {
-    el.innerHTML = '<h2>다가오는 일정</h2><div class="up-none">예정된 일정이 없습니다.</div>';
+    el.innerHTML = '<h2>예정된 작업</h2><div class="up-none">예정된 작업이 없습니다.</div>';
     return;
   }
   let rows = "";
@@ -438,7 +438,7 @@ function renderUpcoming() {
         <span class="detail-id">${ev.videoId}</span>
       </div>`;
   }
-  el.innerHTML = `<h2>다가오는 일정</h2><div class="up-list">${rows}</div>`;
+  el.innerHTML = `<h2>예정된 작업</h2><div class="up-list">${rows}</div>`;
 }
 
 function renderAll() {
