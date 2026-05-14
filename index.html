@@ -57,6 +57,7 @@
   .pip-촬영 { background: #3b82f6; }
   .pip-편집 { background: #8b5cf6; }
   .pip-업로드 { background: #22c55e; }
+  .pip-업로드-예정 { background: white; color: #15803d; border: 1px solid #22c55e; padding: 0 4px; }
   .pip-done { background: #d6d3d1; color: #44403c; font-weight: 700; }
   .track-badges { position: absolute; top: 4px; right: 6px; display: flex; flex-direction: column; gap: 2px; align-items: flex-end; pointer-events: none; }
   .track-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; color: white; font-weight: 600; line-height: 1.3; letter-spacing: -0.02em; }
@@ -332,7 +333,10 @@ function renderCalendar() {
     if (events.length) {
       pips = '<div class="pips">';
       for (const ev of events.slice(0, 3)) {
-        const pipCls = ev.status === "완료" ? "pip pip-done" : `pip pip-${ev.type}`;
+        let pipCls;
+        if (ev.status === "완료") pipCls = "pip pip-done";
+        else if (ev.status === "예정" && ev.type === "업로드") pipCls = "pip pip-업로드-예정";
+        else pipCls = `pip pip-${ev.type}`;
         let pipText = ev.type;
         if (ev.status === "완료") pipText = `${ev.type} 완료`;
         else if (ev.status === "진행중") pipText = `${ev.type} 중`;
