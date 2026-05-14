@@ -3,7 +3,7 @@
     {
       "id": "EP01",
       "title": "개인회생 신청 전 반드시 확인하세요 — 2026년 기준 자가 진단 체크리스트",
-      "category": "도산",
+      "category": "회생 트랙",
       "steps": [
         { "type": "촬영", "date": "2026-04-27", "time": "10:00", "status": "완료" },
         { "type": "편집", "date": "2026-04-27", "endDate": "2026-04-29", "status": "진행중" },
@@ -18,7 +18,7 @@
     {
       "id": "EP02",
       "title": "(기획 중) 도산 — 신규 영상 ①",
-      "category": "도산",
+      "category": "회생 트랙",
       "steps": [
         { "type": "촬영", "date": "2026-04-29", "time": "11:00~12:00", "status": "예정" }
       ],
@@ -27,7 +27,7 @@
     {
       "id": "EP03",
       "title": "(기획 중) 도산 — 신규 영상 ②",
-      "category": "도산",
+      "category": "회생 트랙",
       "steps": [
         { "type": "촬영", "date": "2026-04-29", "time": "13:30~14:30", "status": "예정" }
       ],
@@ -36,7 +36,7 @@
     {
       "id": "rehab-vs-workout",
       "title": "개인회생 VS 워크아웃",
-      "category": "도산",
+      "category": "회생 트랙",
       "steps": [
         { "type": "편집", "date": "2026-05-13", "endDate": "2026-05-15", "status": "진행중" },
         { "type": "업로드", "date": "2026-05-15", "status": "예정" }

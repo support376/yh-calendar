@@ -331,6 +331,7 @@ function renderCalendar() {
         let pipText = ev.type;
         if (ev.status === "완료") pipText = `${ev.type} 완료`;
         else if (ev.status === "진행중") pipText = `${ev.type} 중`;
+        else if (ev.status === "예정") pipText = `${ev.type} 예정`;
         pips += `<div class="${pipCls}">${pipText}</div>`;
       }
       if (events.length > 3) pips += `<div class="pip" style="background:#a8a29e;">+${events.length - 3}</div>`;
