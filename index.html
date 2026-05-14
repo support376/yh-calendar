@@ -396,7 +396,6 @@ function selectDate(dateStr) {
     const catBadge = `<span class="badge badge-cat">${ev.category}</span>`;
     const note = ev.note ? `<div class="detail-note">${ev.note}</div>` : "";
     const planSummary = ev.plan && ev.plan.summary ? `<div class="plan-summary">${ev.plan.summary}</div>` : "";
-    const planLink = ev.plan && ev.plan.url ? `<a class="plan-link" href="${ev.plan.url}" target="_blank" rel="noopener">기획안 전문 보기 →</a>` : "";
     const isRange = ev.endDate && ev.endDate !== ev.date;
     const rangeInfo = isRange
       ? `<div class="detail-range">기간: ${dateRangeLabel(ev.date, ev.endDate)} · 총 ${daysBetween(ev.date, ev.endDate)}일</div>`
@@ -408,7 +407,6 @@ function selectDate(dateStr) {
         ${rangeInfo}
         ${note}
         ${planSummary}
-        ${planLink}
       </div>`;
   }
   detail.innerHTML = `<div class="detail-date">${fmtKo(dateStr)}</div>${items}`;
@@ -499,9 +497,6 @@ function statusLine(v, stage) {
 }
 
 function renderBoardCard(v, stage) {
-  const planLink = v.plan && v.plan.url
-    ? `<a class="plan-link" href="${v.plan.url}" target="_blank" rel="noopener">기획안 전문 보기 →</a>`
-    : "";
   const noteLine = v.note ? `<div class="bcard-note">${v.note}</div>` : "";
   return `<div class="bcard">
     <div class="bcard-top">
@@ -512,7 +507,6 @@ function renderBoardCard(v, stage) {
     ${progressDots(v)}
     ${statusLine(v, stage)}
     ${noteLine}
-    ${planLink}
   </div>`;
 }
 
