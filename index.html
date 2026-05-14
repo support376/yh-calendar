@@ -92,9 +92,15 @@
   .upcoming { margin-top: 24px; }
   .upcoming h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
   .up-list { display: flex; flex-direction: column; gap: 6px; }
-  .up-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border: 1px solid #e7e5e4; border-radius: 8px; font-size: 13px; }
-  .up-date { font-weight: 600; color: #44403c; min-width: 56px; }
-  .up-title { color: #1c1917; flex: 1; }
+  .up-row { display: grid; grid-template-columns: 120px 52px 56px 1fr auto; align-items: center; gap: 10px; padding: 8px 12px; background: white; border: 1px solid #e7e5e4; border-radius: 8px; font-size: 13px; }
+  .up-date { font-weight: 600; color: #44403c; font-variant-numeric: tabular-nums; }
+  .up-type { justify-self: start; }
+  .up-time { justify-self: start; }
+  .up-title { color: #1c1917; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (max-width: 600px) {
+    .up-row { grid-template-columns: 110px 52px 1fr; row-gap: 4px; }
+    .up-row .up-time, .up-row .detail-id { display: none; }
+  }
   .up-none { color: #a8a29e; text-align: center; padding: 16px; }
 
   /* ── 에러 ── */
@@ -235,13 +241,16 @@ function fmtKo(s) {
 }
 
 function dateRangeLabel(start, end) {
+  const pad = n => String(n).padStart(2, "0");
   if (!end || end === start) {
     const [, m, d] = start.split("-").map(Number);
-    return `${m}/${d}`;
+    return `${pad(m)}/${pad(d)}`;
   }
   const [, m1, d1] = start.split("-").map(Number);
   const [, m2, d2] = end.split("-").map(Number);
-  return m1 === m2 ? `${m1}/${d1} ~ ${d2}` : `${m1}/${d1} ~ ${m2}/${d2}`;
+  return m1 === m2
+    ? `${pad(m1)}/${pad(d1)} ~ ${pad(d2)}`
+    : `${pad(m1)}/${pad(d1)} ~ ${pad(m2)}/${pad(d2)}`;
 }
 
 function daysBetween(start, end) {
@@ -429,12 +438,14 @@ function renderUpcoming() {
       const [,m,d] = ev.date.split("-").map(Number);
       return `${m}/${d}`;
     })();
-    const upTime = (!isRange && ev.time) ? `<span class="badge badge-time" style="font-size:10px;">${ev.time}</span>` : "";
+    const upTime = (!isRange && ev.time)
+      ? `<span class="badge badge-time" style="font-size:10px;">${ev.time}</span>`
+      : "";
     rows += `
       <div class="up-row">
         <div class="up-date">${dateText}</div>
-        <span class="badge badge-${ev.type}" style="font-size:10px;">${ev.type}</span>
-        ${upTime}
+        <span class="badge badge-${ev.type} up-type" style="font-size:10px;">${ev.type}</span>
+        <div class="up-time">${upTime}</div>
         <div class="up-title">${ev.videoTitle}</div>
         <span class="detail-id">${ev.videoId}</span>
       </div>`;
