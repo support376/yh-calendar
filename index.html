@@ -455,7 +455,7 @@ function videoStage(v) {
   const up = v.steps.find(s => s.type === "업로드");
   const shoot = v.steps.find(s => s.type === "촬영");
   if (up && up.status === "완료") return "done";
-  if (shoot && shoot.status === "완료") return "wip";
+  if (!shoot || shoot.status === "완료") return "wip";
   return "todo";
 }
 
