@@ -26,6 +26,14 @@
       ]
     },
     {
+      "id": "intro",
+      "title": "양홍수 변호사 인트로 촬영",
+      "category": "공통",
+      "steps": [
+        { "type": "촬영", "date": "2026-05-19", "status": "예정" }
+      ]
+    },
+    {
       "id": "rehab-procedure-timeline",
       "title": "개인회생, 신청 방법부터 기간까지 실제로 몇 달 걸리나? (2026년 최신 기준)",
       "category": "회생 트랙",
