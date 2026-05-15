@@ -294,7 +294,7 @@ function monthStats(y, m) {
   return { total, done, shoots, uploads };
 }
 
-/* 다가오는 일정 (오늘 이후, 최대 8건) */
+/* 다가오는 일정 (오늘 이후, 최대 15건) */
 function upcomingEvents() {
   const t = today();
   const all = [];
@@ -307,7 +307,7 @@ function upcomingEvents() {
     }
   }
   all.sort((a,b) => a.date.localeCompare(b.date));
-  return all.slice(0, 8);
+  return all.slice(0, 15);
 }
 
 /* ─── 렌더링 ─── */
