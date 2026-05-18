@@ -20,9 +20,10 @@
       "id": "rehab-vs-workout",
       "title": "개인회생 vs 워크아웃, 무작정 회생 신청하면 망합니다",
       "category": "회생 트랙",
+      "youtube_url": "https://youtu.be/HtiFhJAW52E",
       "steps": [
-        { "type": "편집", "date": "2026-05-13", "endDate": "2026-05-15", "status": "진행중" },
-        { "type": "업로드", "date": "2026-05-15", "status": "예정" }
+        { "type": "편집", "date": "2026-05-13", "endDate": "2026-05-15", "status": "완료" },
+        { "type": "업로드", "date": "2026-05-15", "status": "완료" }
       ]
     },
     {
@@ -30,8 +31,8 @@
       "title": "양홍수 변호사 인트로",
       "category": "인트로",
       "steps": [
-        { "type": "촬영", "date": "2026-05-19", "time": "오전", "status": "예정" },
-        { "type": "편집", "date": "2026-05-19", "endDate": "2026-05-21", "status": "예정" },
+        { "type": "촬영", "date": "2026-05-20", "time": "오전", "status": "예정" },
+        { "type": "편집", "date": "2026-05-20", "endDate": "2026-05-21", "status": "예정" },
         { "type": "전달", "date": "2026-05-21", "status": "예정" }
       ]
     },
@@ -40,8 +41,8 @@
       "title": "개인회생, 신청 방법부터 기간까지 실제로 몇 달 걸리나? (2026년 최신 기준)",
       "category": "회생 트랙",
       "steps": [
-        { "type": "촬영", "date": "2026-05-18", "time": "오전", "status": "예정" },
-        { "type": "편집", "date": "2026-05-18", "endDate": "2026-05-20", "status": "예정" },
+        { "type": "촬영", "date": "2026-05-18", "time": "오전", "status": "완료" },
+        { "type": "편집", "date": "2026-05-18", "endDate": "2026-05-20", "status": "진행중" },
         { "type": "업로드", "date": "2026-05-20", "status": "예정" }
       ],
       "plan": {
