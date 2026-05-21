@@ -269,7 +269,7 @@ function eventsOn(dateStr) {
       const start = s.date;
       const end = s.endDate || s.date;
       if (dateStr >= start && dateStr <= end) {
-        list.push({ ...s, videoId: v.id, videoTitle: v.title, category: v.category, note: v.note, plan: v.plan });
+        list.push({ ...s, videoId: v.id, videoTitle: v.title, category: v.category, note: s.note || v.note, plan: v.plan });
       }
     }
   }
