@@ -106,6 +106,14 @@
   }
   .up-none { color: #a8a29e; text-align: center; padding: 16px; }
 
+  /* ── 작업 예정 리스트 ── */
+  .backlog { margin-top: 24px; }
+  .backlog h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .bl-list { display: flex; flex-direction: column; gap: 6px; }
+  .bl-row { display: flex; align-items: center; gap: 9px; padding: 8px 12px; background: white; border: 1px solid #e7e5e4; border-radius: 8px; font-size: 13px; }
+  .bl-dot { width: 7px; height: 7px; border-radius: 50%; background: #a8a29e; flex-shrink: 0; }
+  .bl-title { color: #1c1917; }
+
   /* ── 에러 ── */
   .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; color: #991b1b; text-align: center; margin: 20px 0; }
 
@@ -206,6 +214,7 @@
   </div>
 
   <div class="upcoming" id="upcoming"></div>
+  <div class="backlog" id="backlog"></div>
   </div>
 
   <div class="panel" id="panel-board">
@@ -216,6 +225,7 @@
 <script>
 /* ─── 데이터 ─── */
 let VIDEOS = [];
+let BACKLOG = [];
 let viewYear, viewMonth;
 
 async function loadData() {
@@ -224,6 +234,7 @@ async function loadData() {
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     VIDEOS = data.videos || [];
+    BACKLOG = data.backlog || [];
   } catch (e) {
     document.querySelector(".cal").innerHTML =
       '<div class="error-box">schedule.json을 불러올 수 없습니다.<br>같은 폴더에 파일이 있는지 확인해주세요.</div>';
@@ -460,10 +471,22 @@ function renderUpcoming() {
   el.innerHTML = `<h2>예정된 작업</h2><div class="up-list">${rows}</div>`;
 }
 
+function renderBacklog() {
+  const el = document.getElementById("backlog");
+  if (!el) return;
+  if (!BACKLOG.length) { el.innerHTML = ""; return; }
+  const rows = BACKLOG.map(item => {
+    const text = typeof item === "string" ? item : (item.title || "");
+    return `<div class="bl-row"><span class="bl-dot"></span><span class="bl-title">${text}</span></div>`;
+  }).join("");
+  el.innerHTML = `<h2>작업 예정 리스트</h2><div class="bl-list">${rows}</div>`;
+}
+
 function renderAll() {
   renderStats();
   renderCalendar();
   renderUpcoming();
+  renderBacklog();
   renderBoard();
   document.getElementById("detail").innerHTML = '<div class="detail-empty">날짜를 클릭하면 그 날의 일정을 볼 수 있어요.</div>';
 }
