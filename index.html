@@ -29,6 +29,7 @@
   .dot-edit { background: #8b5cf6; }
   .dot-upload { background: #22c55e; }
   .dot-done { background: #d6d3d1; }
+  .dot-late { background: #ef4444; }
 
   /* ── 월 네비 ── */
   .month-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -60,6 +61,7 @@
   .pip-업로드-예정 { background: white; color: #15803d; border: 1px dashed #22c55e; padding: 0 4px; }
   .pip-전달 { background: #14b8a6; }
   .pip-done { background: #d6d3d1; color: #44403c; font-weight: 700; }
+  .pip-지연 { background: #ef4444; }
   .track-badges { position: absolute; top: 4px; right: 6px; display: flex; flex-direction: column; gap: 2px; align-items: flex-end; pointer-events: none; }
   .track-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; color: white; font-weight: 600; line-height: 1.3; letter-spacing: -0.02em; }
   .track-badge.tb-rehab { background: #0284c7; }
@@ -82,6 +84,7 @@
   .badge-done { background: #e7e5e4; color: #78716c; }
   .badge-예정 { background: #f0f9ff; color: #0369a1; }
   .badge-doing { background: #fef3c7; color: #92400e; }
+  .badge-지연 { background: #fee2e2; color: #b91c1c; }
   .badge-time { background: #f1f5f9; color: #334155; font-variant-numeric: tabular-nums; font-weight: 700; }
   .detail-title { font-weight: 600; font-size: 14px; color: #1c1917; }
   .detail-id { font-size: 12px; color: #a8a29e; }
@@ -146,6 +149,7 @@
   .prog-dot.done { background: #16a34a; }
   .prog-dot.wip { background: #f59e0b; }
   .prog-dot.upcoming { background: #e7e5e4; }
+  .prog-dot.late { background: #ef4444; }
   .prog-arrow { color: #d6d3d1; font-size: 11px; line-height: 1; }
   .prog-label { margin-left: 6px; font-size: 11px; color: #78716c; font-weight: 500; }
   .bcard-next { font-size: 12px; color: #44403c; margin-top: 6px; padding: 7px 10px; background: white; border-radius: 5px; border-left: 3px solid #0284c7; line-height: 1.5; }
@@ -194,6 +198,7 @@
     <div class="legend-item"><div class="legend-dot dot-edit"></div>편집</div>
     <div class="legend-item"><div class="legend-dot dot-upload"></div>업로드</div>
     <div class="legend-item"><div class="legend-dot dot-done"></div>완료</div>
+    <div class="legend-item"><div class="legend-dot dot-late"></div>지연</div>
   </div>
 
   <div class="month-nav">
@@ -272,6 +277,20 @@ function daysBetween(start, end) {
   return Math.round((b - a) / 86400000) + 1;
 }
 
+/* 단계의 실제 상태: status가 명시돼 있으면 그대로 사용(예외 처리용),
+   없으면 오늘 날짜 기준으로 자동 계산.
+   - 오늘 < 시작일      → 예정
+   - 시작일 ≤ 오늘 ≤ 종료일 → 진행중
+   - 오늘 > 종료일      → 지연 (완료는 실제 완료 시에만 status로 명시) */
+function effStatus(s) {
+  if (s.status) return s.status;
+  const t = today();
+  const end = s.endDate || s.date;
+  if (t < s.date) return "예정";
+  if (t > end) return "지연";
+  return "진행중";
+}
+
 /* 날짜 → 그날의 이벤트 목록 (endDate 있으면 range 처리) */
 function eventsOn(dateStr) {
   const list = [];
@@ -299,9 +318,10 @@ function monthStats(y, m) {
       const stepEnd = s.endDate || s.date;
       if (stepStart > monthEnd || stepEnd < monthStart) continue;
       total++;
-      if (s.status === "완료") done++;
-      if (s.type === "촬영" && s.status === "예정") shoots++;
-      if (s.type === "업로드" && s.status === "예정") uploads++;
+      const est = effStatus(s);
+      if (est === "완료") done++;
+      if (s.type === "촬영" && est === "예정") shoots++;
+      if (s.type === "업로드" && est === "예정") uploads++;
     }
   }
   return { total, done, shoots, uploads };
@@ -314,7 +334,7 @@ function upcomingEvents() {
   for (const v of VIDEOS) {
     for (const s of v.steps) {
       const stepEnd = s.endDate || s.date;
-      if (stepEnd >= t && s.status !== "완료") {
+      if (stepEnd >= t && effStatus(s) !== "완료") {
         all.push({ ...s, videoTitle: v.title, videoId: v.id });
       }
     }
@@ -359,14 +379,17 @@ function renderCalendar() {
     if (events.length) {
       pips = '<div class="pips">';
       for (const ev of events.slice(0, 3)) {
+        const st = effStatus(ev);
         let pipCls;
-        if (ev.status === "완료") pipCls = "pip pip-done";
-        else if (ev.status === "예정" && ev.type === "업로드") pipCls = "pip pip-업로드-예정";
+        if (st === "완료") pipCls = "pip pip-done";
+        else if (st === "지연") pipCls = "pip pip-지연";
+        else if (st === "예정" && ev.type === "업로드") pipCls = "pip pip-업로드-예정";
         else pipCls = `pip pip-${ev.type}`;
         let pipText = ev.type;
-        if (ev.status === "완료") pipText = `${ev.type} 완료`;
-        else if (ev.status === "진행중") pipText = k < todayStr ? ev.type : `${ev.type} 중`;
-        else if (ev.status === "예정") pipText = `${ev.type} 예정`;
+        if (st === "완료") pipText = `${ev.type} 완료`;
+        else if (st === "지연") pipText = `${ev.type} 지연`;
+        else if (st === "진행중") pipText = k < todayStr ? ev.type : `${ev.type} 중`;
+        else if (st === "예정") pipText = `${ev.type} 예정`;
         if (ev.time) pipText += ` (${ev.time})`;
         pips += `<div class="${pipCls}">${pipText}</div>`;
       }
@@ -412,11 +435,14 @@ function selectDate(dateStr) {
 
   let items = "";
   for (const ev of events) {
+    const st = effStatus(ev);
     let typeBadge;
-    if (ev.status === "완료") {
+    if (st === "완료") {
       typeBadge = `<span class="badge badge-${ev.type}" style="opacity:.65">${ev.type}</span><span class="badge badge-done">완료</span>`;
-    } else if (ev.status === "진행중") {
+    } else if (st === "진행중") {
       typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-doing">진행중</span>`;
+    } else if (st === "지연") {
+      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-지연">지연</span>`;
     } else {
       typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-예정">예정</span>`;
     }
@@ -495,8 +521,8 @@ function renderAll() {
 function videoStage(v) {
   const up = v.steps.find(s => s.type === "업로드");
   const shoot = v.steps.find(s => s.type === "촬영");
-  if (up && up.status === "완료") return "done";
-  if (!shoot || shoot.status === "완료") return "wip";
+  if (up && effStatus(up) === "완료") return "done";
+  if (!shoot || effStatus(shoot) === "완료") return "wip";
   return "todo";
 }
 
@@ -510,9 +536,13 @@ function progressDots(v) {
     let cls = "prog-dot";
     let title = t;
     if (!step) { cls += " upcoming"; title += " 없음"; }
-    else if (step.status === "완료") { cls += " done"; title += " 완료"; done++; }
-    else if (step.status === "진행중") { cls += " wip"; title += " 진행중"; }
-    else { cls += " upcoming"; title += " 예정"; }
+    else {
+      const est = effStatus(step);
+      if (est === "완료") { cls += " done"; title += " 완료"; done++; }
+      else if (est === "진행중") { cls += " wip"; title += " 진행중"; }
+      else if (est === "지연") { cls += " late"; title += " 지연"; }
+      else { cls += " upcoming"; title += " 예정"; }
+    }
     html += `<span class="${cls}" title="${title}"></span>`;
     if (i < order.length - 1) html += '<span class="prog-arrow">→</span>';
   }
@@ -522,12 +552,13 @@ function progressDots(v) {
 }
 
 function statusLine(v, stage) {
-  const next = v.steps.find(s => s.status !== "완료");
+  const next = v.steps.find(s => effStatus(s) !== "완료");
   if (next) {
+    const est = effStatus(next);
     const isRange = next.endDate && next.endDate !== next.date;
     const dateText = dateRangeLabel(next.date, next.endDate);
     const time = (!isRange && next.time) ? ` ${next.time}` : "";
-    const verb = next.status === "진행중" ? "진행중" : "예정";
+    const verb = est === "진행중" ? "진행중" : est === "지연" ? "지연" : "예정";
     return `<div class="bcard-next"><strong>${dateText}${time}</strong> · ${next.type} ${verb}</div>`;
   }
   if (stage === "done") {
