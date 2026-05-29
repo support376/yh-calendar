@@ -375,10 +375,10 @@ function renderCalendar() {
         if (st === "완료") pipCls = "pip pip-done";
         else if (st === "예정" && ev.type === "업로드") pipCls = "pip pip-업로드-예정";
         else pipCls = `pip pip-${ev.type}`;
-        let pipText = ev.type;
-        if (st === "완료") pipText = `${ev.type} 완료`;
-        else if (st === "진행중") pipText = k < todayStr ? ev.type : `${ev.type} 중`;
-        else if (st === "예정") pipText = `${ev.type} 예정`;
+        const baseLabel = ev.label || ev.type;
+        let pipText = baseLabel;
+        if (st === "완료") pipText = `${baseLabel} 완료`;
+        else if (st === "예정") pipText = `${baseLabel} 예정`;
         if (ev.time) pipText += ` (${ev.time})`;
         pips += `<div class="${pipCls}">${pipText}</div>`;
       }
@@ -425,13 +425,14 @@ function selectDate(dateStr) {
   let items = "";
   for (const ev of events) {
     const st = effStatus(ev);
+    const typeText = ev.label || ev.type;
     let typeBadge;
     if (st === "완료") {
-      typeBadge = `<span class="badge badge-${ev.type}" style="opacity:.65">${ev.type}</span><span class="badge badge-done">완료</span>`;
+      typeBadge = `<span class="badge badge-${ev.type}" style="opacity:.65">${typeText}</span><span class="badge badge-done">완료</span>`;
     } else if (st === "진행중") {
-      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-doing">진행중</span>`;
+      typeBadge = `<span class="badge badge-${ev.type}">${typeText}</span><span class="badge badge-doing">진행중</span>`;
     } else {
-      typeBadge = `<span class="badge badge-${ev.type}">${ev.type}</span><span class="badge badge-예정">예정</span>`;
+      typeBadge = `<span class="badge badge-${ev.type}">${typeText}</span><span class="badge badge-예정">예정</span>`;
     }
     const timeBadge = ev.time ? `<span class="badge badge-time">${ev.time}</span>` : "";
     const catBadge = `<span class="badge badge-cat">${ev.category}</span>`;
@@ -475,7 +476,7 @@ function renderUpcoming() {
     rows += `
       <div class="up-row">
         <div class="up-date">${dateText}</div>
-        <span class="badge badge-${ev.type} up-type" style="font-size:10px;">${ev.type}</span>
+        <span class="badge badge-${ev.type} up-type" style="font-size:10px;">${ev.label || ev.type}</span>
         <div class="up-time">${upTime}</div>
         <div class="up-title">${ev.videoTitle}</div>
         <span class="detail-id">${ev.videoId}</span>
